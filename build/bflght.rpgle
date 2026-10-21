@@ -1,4 +1,4 @@
-     H DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('FLGHT400F/FUTIL')
+     H DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('FUTIL')
 
      FFRCITY    IP   E           K DISK
      FTOCITY    IF   E           K DISK

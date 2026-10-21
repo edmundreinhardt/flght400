@@ -6,7 +6,7 @@ ctl-opt nomain ccsidcvt(*excp) ccsid(*char : *jobrun);
 
 /include RPGUNIT/QINCLUDE,TESTCASE
 
-// Prototypes for Original (FLGHT400) and Modernized (FLGHT400F) programs
+// Prototypes for Original (FLGHT400) and Modernized programs
 dcl-pr rtdofw_orig extpgm('FLGHT400/RTDOFW');
   g$mm packed(2:0);
   g$dd packed(2:0);
@@ -14,7 +14,7 @@ dcl-pr rtdofw_orig extpgm('FLGHT400/RTDOFW');
   dayowk char(16);
 end-pr;
 
-dcl-pr rtdofw_mod extpgm('FLGHT400F/RTDOFW');
+dcl-pr rtdofw_mod extpgm('RTDOFW');
   g$mm packed(2:0);
   g$dd packed(2:0);
   g$yyyy packed(4:0);
@@ -55,7 +55,7 @@ dcl-proc assertRtdofwEquiv;
 
   // Assert modernized output exactly matches original output
   assertEqual(out_day_orig : out_day_mod :
-    'Mismatch between FLGHT400 and FLGHT400F for ' +
+    'Mismatch between original and modernized for ' +
     %char(mm) + '/' + %char(dd) + '/' + %char(yyyy));
 
   // If expected day name is passed, also verify ground truth

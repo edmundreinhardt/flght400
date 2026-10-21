@@ -6,7 +6,7 @@ ctl-opt nomain ccsidcvt(*excp) ccsid(*char : *jobrun);
 
 /include RPGUNIT/QINCLUDE,TESTCASE
 
-// Prototypes for Original (FLGHT400) and Modernized (FLGHT400F) programs
+// Prototypes for Original (FLGHT400) and Modernized programs
 dcl-pr rtrand_orig extpgm('FLGHT400/RTRAND');
   bgnnbr packed(6:0);
   endnbr packed(6:0);

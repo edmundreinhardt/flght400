@@ -1,4 +1,4 @@
-     H DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('FLGHT400F/FUTIL')
+     H DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('FUTIL')
 
      FFNAME     IF   E             DISK
      FLNAME     IF   E             DISK

@@ -31,23 +31,23 @@ dcl-pr rtdofw_orig extpgm('FLGHT400/RTDOFW');
 end-pr;
 
 // =====================================================================
-// Prototypes for Modernized Programs (FLGHT400F)
+// Prototypes for Modernized Programs
 // =====================================================================
-dcl-pr gtojcv_mod extpgm('FLGHT400F/GTOJCV');
+dcl-pr gtojcv_mod extpgm('GTOJCV');
   g$mm packed(2:0);
   g$dd packed(2:0);
   g$yyyy packed(4:0);
   g$jd packed(5:0);
 end-pr;
 
-dcl-pr jtogcv_mod extpgm('FLGHT400F/JTOGCV');
+dcl-pr jtogcv_mod extpgm('JTOGCV');
   j$jd packed(5:0);
   j$mm packed(2:0);
   j$dd packed(2:0);
   j$yyyy packed(4:0);
 end-pr;
 
-dcl-pr rtdofw_mod extpgm('FLGHT400F/RTDOFW');
+dcl-pr rtdofw_mod extpgm('RTDOFW');
   g$mm packed(2:0);
   g$dd packed(2:0);
   g$yyyy packed(4:0);

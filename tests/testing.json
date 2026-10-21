@@ -2,7 +2,7 @@
   "rpgunit": {
     "rucrtrpg": {
       "bndSrvPgm": [
-        "FLGHT400F/FUTIL"
+        "FUTIL"
       ],
       "tgtCcsid": "37",
       "dbgView": "*SOURCE",

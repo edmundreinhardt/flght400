@@ -6,7 +6,7 @@ ctl-opt nomain ccsidcvt(*excp) ccsid(*char : *jobrun);
 
 /include RPGUNIT/QINCLUDE,TESTCASE
 
-// Prototypes for Original (FLGHT400) and Modernized (FLGHT400F) programs
+// Prototypes for Original (FLGHT400) and Modernized programs
 dcl-pr gtojcv_orig extpgm('FLGHT400/GTOJCV');
   g$mm packed(2:0);
   g$dd packed(2:0);
@@ -14,7 +14,7 @@ dcl-pr gtojcv_orig extpgm('FLGHT400/GTOJCV');
   g$jd packed(5:0);
 end-pr;
 
-dcl-pr gtojcv_mod extpgm('FLGHT400F/GTOJCV');
+dcl-pr gtojcv_mod extpgm('GTOJCV');
   g$mm packed(2:0);
   g$dd packed(2:0);
   g$yyyy packed(4:0);

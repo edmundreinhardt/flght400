@@ -1,0 +1,15 @@
+{
+  "rpgunit": {
+    "rucrtrpg": {
+      "bndSrvPgm": [
+        "FLGHT400F/FUTIL"
+      ],
+      "tgtCcsid": "37",
+      "dbgView": "*SOURCE",
+      "rpgPpOpt": "*LVL2",
+      "cOption": [
+        "*EVENTF"
+      ]
+    }
+  }
+}

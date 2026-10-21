@@ -1,0 +1,8 @@
+      *%METADATA                                                       *
+      * %TEXT Airline Table for validation by Initials                 *
+      *%EMETADATA                                                      *
+                                            UNIQUE
+                R AIRLNL                    PFILE(AIRLINE)
+                  AIRLNM    R
+                  AIRLIN    R
+                K AIRLIN

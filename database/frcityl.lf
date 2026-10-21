@@ -1,0 +1,9 @@
+      *%METADATA                                                       *
+      * %TEXT City table for building Flights (From City)              *
+      *%EMETADATA                                                      *
+                                            UNIQUE
+                R FRCTYL                    PFILE(FRCITY)
+                  FRCNAM    R
+                  FRCINT    R
+                  FRCALN    R
+                K FRCINT

@@ -1,0 +1,164 @@
+      *-----------------------------------------------------------------
+      * PROTYPES.RPGLE - Shared program call prototypes
+      * Used by all FRS programs in FLGHT400F
+      *-----------------------------------------------------------------
+      * IBM system APIs
+      *-----------------------------------------------------------------
+     D QMHRMVPM        PR                  EXTPGM('QMHRMVPM')
+     D  MsgQ                         10A
+     D  MsgQCtr                       9B 0
+     D  MsgKey                        4A
+     D  RmvClr                       10A
+     D  ApiErr                      256A   OPTIONS(*VARSIZE)
+      *
+     D QMHSNDPM        PR                  EXTPGM('QMHSNDPM')
+     D  MsgId                         7A
+     D  MsgF                         20A
+     D  MsgDta                       80A
+     D  MsgDtaLen                     9B 0
+     D  MsgTyp                       10A
+     D  MsgQ                         10A
+     D  MsgQCtr                       9B 0
+     D  MsgKey                        4A
+     D  ApiErr                      256A   OPTIONS(*VARSIZE)
+      *
+     D QCMDEXC         PR                  EXTPGM('QCMDEXC')
+     D  Cmd                       32702A   OPTIONS(*VARSIZE)
+     D  CmdLen                       15P 5
+      *
+     D QUSCMDLN        PR                  EXTPGM('QUSCMDLN')
+      *
+     D QWCCVTDT        PR                  EXTPGM('QWCCVTDT')
+     D  FmtIn                        10A
+     D  DtIn                         16A
+     D  FmtOut                       10A
+     D  DtOut                        16A
+     D  ApiErr                      256A   OPTIONS(*VARSIZE)
+      *-----------------------------------------------------------------
+      * Application utility procedures (FUTIL service program)
+      *-----------------------------------------------------------------
+     D gregorianToJulian...
+     D                 PR             5P 0 EXTPROC('gregorianToJulian')
+     D  inMonth                       2P 0 CONST
+     D  inDay                         2P 0 CONST
+     D  inYear                        4P 0 CONST
+     D  outJulianDay                  5P 0 OPTIONS(*NOPASS)
+      *
+     D julianToGregorian...
+     D                 PR                  EXTPROC('julianToGregorian')
+     D  inJulianDay                   5P 0 CONST
+     D  outMonth                      2P 0
+     D  outDay                        2P 0
+     D  outYear                       4P 0
+      *
+     D getDayOfWeek    PR            16A   EXTPROC('getDayOfWeek')
+     D  inMonth                       2P 0 CONST
+     D  inDay                         2P 0 CONST
+     D  inYear                        4P 0 CONST
+     D  outDayOfWeek                 16A   OPTIONS(*NOPASS)
+      *
+     D getRandomNumber...
+     D                 PR             6P 0 EXTPROC('getRandomNumber')
+     D  inBeginNumber                 6P 0 CONST OPTIONS(*NOPASS)
+     D  inEndNumber                   6P 0 CONST OPTIONS(*NOPASS)
+     D  outRandomNumber...
+     D                                6P 0 OPTIONS(*NOPASS)
+      *
+     D initializeRandomSeed...
+     D                 PR                  EXTPROC('initializeRandomSeed')
+     D  Seed                          9P 9
+      *-----------------------------------------------------------------
+      * FRS application programs
+      *-----------------------------------------------------------------
+     D FRS001          PR                  EXTPGM('FRS001')
+     D  Agent#                        9P 0
+      *
+     D FRS002          PR                  EXTPGM('FRS002')
+     D  Agent#                        9P 0
+     D  Order#                        9P 0
+      *
+     D FRS003          PR                  EXTPGM('FRS003')
+     D  Agent#                        9P 0
+     D  Order#                        9P 0
+      *
+     D FRS004          PR                  EXTPGM('FRS004')
+     D  Agent#                        9P 0
+     D  Order#                        9P 0
+      *
+     D FRS005          PR                  EXTPGM('FRS005')
+     D  Agent#                        9P 0
+     D  Order#                        9P 0
+      *
+     D FRS009          PR                  EXTPGM('FRS009')
+     D  Agent#                        9P 0
+     D  RunTyp                        6A
+      *
+     D FRS401          PR                  EXTPGM('FRS401')
+     D  PAgent                       10A
+      *
+     D FRS402          PR                  EXTPGM('FRS402')
+     D  FrmCty                       16A
+     D  FrmInt                        3A
+     D  FrmAir                        3A
+      *
+     D FRS403          PR                  EXTPGM('FRS403')
+     D  PrmCty                       16A
+     D  PrmInt                        3A
+      *
+     D FRS404          PR                  EXTPGM('FRS404')
+     D  IFltKy                       58A
+     D  PFlght                        7P 0
+     D  PDpTim                       34A
+     D  PArTim                       34A
+     D  PAirLn                       34A
+     D  PPrice                       24A
+      *
+     D FRS405          PR                  EXTPGM('FRS405')
+     D  PCusNo                        9P 0
+     D  PCusNm                       25A
+      *
+     D FRS406          PR                  EXTPGM('FRS406')
+     D  Order#                        9P 0
+     D  EndYn                         1A
+      *
+     D FRS407          PR                  EXTPGM('FRS407')
+     D  PDepYY                        4P 0
+     D  PDepMM                        2P 0
+     D  PDepDD                        2P 0
+     D  POrdNo                        9P 0
+      *
+     D FRS408          PR                  EXTPGM('FRS408')
+     D  PCusNm                       25A
+     D  POrdNo                        9P 0
+      *
+     D FRS409          PR                  EXTPGM('FRS409')
+     D  Order#                        9P 0
+     D  EndYn                         1A
+      *
+     D FRS410          PR                  EXTPGM('FRS410')
+     D  Order#                        9P 0
+     D  EndYn                         1A
+      *
+     D MSGPRG          PR                  EXTPGM('MSGPRG')
+      *
+     D FRS411          PR                  EXTPGM('FRS411')
+      *
+     D FRS412          PR                  EXTPGM('FRS412')
+     D  PAirLn                       16A
+     D  PAirLi                        3A
+      *
+     D FRS413          PR                  EXTPGM('FRS413')
+     D  SFlght                        9P 0
+     D  SDyOwk                        9A
+     D  SFrCty                       16A
+     D  SToCty                       16A
+     D  SDptHH                        2A
+     D  SDptMM                        2A
+     D  SDptAP                        2A
+     D  SArrHH                        2A
+     D  SArrMM                        2A
+     D  SArrAP                        2A
+     D  SMiles                        5P 0
+     D  SAirIn                        3A
+     D  SSeats                        3P 0
+     D  SPrice                        3A

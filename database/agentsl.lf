@@ -1,0 +1,8 @@
+      *%METADATA                                                       *
+      * %TEXT Airline Agents by Name                                   *
+      *%EMETADATA                                                      *
+     A          R ANAMER                    PFILE(AGENTS)
+     A            AGNMBR    R               RENAME(AGENT_NO)
+     A            AGNAME    R               RENAME(AGENT_NAME)
+     A            AGPASS    R               RENAME(AGENT00001)
+     A          K AGNAME

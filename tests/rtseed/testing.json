@@ -1,0 +1,15 @@
+{
+  "rpgunit": {
+    "rucrtrpg": {
+      "module": [
+        "FLGHT400F/RTSEED"
+      ],
+      "tgtCcsid": "37",
+      "dbgView": "*SOURCE",
+      "rpgPpOpt": "*LVL2",
+      "cOption": [
+        "*EVENTF"
+      ]
+    }
+  }
+}

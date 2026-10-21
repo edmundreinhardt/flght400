@@ -1,0 +1,9 @@
+      /*%METADATA                                                     */
+      /* %TEXT Displays confirmation messages                         */
+      /*%EMETADATA                                                    */
+PGM
+DCLF       FILE(FLGHT400/MSGPANEL) RCDFMT(MSGPANEL)
+           CHGVAR &MLINE2 ('PROCESSING ORDER...')
+             SNDRCVF    RCDFMT(MSGPANEL) WAIT(*YES)
+           DSPLIB LIB(MARKNAP) OUTPUT(*PRINT)
+ENDPGM

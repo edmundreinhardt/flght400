@@ -1,0 +1,9 @@
+      /*%METADATA                                                     */
+      /* %TEXT FUTIL Service Program Binder Source                    */
+      /*%EMETADATA                                                    */
+STRPGMEXP  PGMLVL(*CURRENT) SIGNATURE('FUTIL_V1')
+  EXPORT SYMBOL('gregorianToJulian')
+  EXPORT SYMBOL('julianToGregorian')
+  EXPORT SYMBOL('getDayOfWeek')
+  EXPORT SYMBOL('getRandomNumber')
+ENDPGMEXP

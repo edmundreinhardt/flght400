@@ -1,0 +1,26 @@
+# Layer 2 -- Display Files
+FRS000DF.FILE: frs000df.dspf
+FRS001DF.FILE: frs001df.dspf
+FRS002DF.FILE: frs002df.dspf
+FRS003DF.FILE: frs003df.dspf
+FRS004DF.FILE: frs004df.dspf
+FRS005DF.FILE: frs005df.dspf
+FRS009DF.FILE: frs009df.dspf
+FRS021DF.FILE: frs021df.dspf
+FRS022DF.FILE: frs022df.dspf
+FRS023DF.FILE: frs023df.dspf
+FRS024DF.FILE: frs024df.dspf
+FRS401DF.FILE: frs401df.dspf
+FRS402DF.FILE: frs402df.dspf
+FRS403DF.FILE: frs403df.dspf
+FRS404DF.FILE: frs404df.dspf
+FRS405DF.FILE: frs405df.dspf
+FRS406DF.FILE: frs406df.dspf
+FRS407DF.FILE: frs407df.dspf
+FRS408DF.FILE: frs408df.dspf
+FRS409DF.FILE: frs409df.dspf
+FRS410DF.FILE: frs410df.dspf
+FRS411DF.FILE: frs411df.dspf
+FRS412DF.FILE: frs412df.dspf
+FRS413DF.FILE: frs413df.dspf
+MSGPANEL.FILE: msgpanel.dspf

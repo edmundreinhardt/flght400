@@ -6,15 +6,15 @@ ctl-opt nomain ccsidcvt(*excp) ccsid(*char : *jobrun);
 
 /include RPGUNIT/QINCLUDE,TESTCASE
 
-// Prototypes for Original (FLGHT400) and Modernized programs
-dcl-pr rtdofw_orig extpgm('FLGHT400/RTDOFW');
+// Prototypes for Original (FLGHT400_O) and Modernized (FLGHT400) programs
+dcl-pr rtdofw_orig extpgm('RTDOFW');
   g$mm packed(2:0);
   g$dd packed(2:0);
   g$yyyy packed(4:0);
   dayowk char(16);
 end-pr;
 
-dcl-pr rtdofw_mod extpgm('RTDOFW');
+dcl-pr rtdofw_mod extpgm('FLGHT400_O/RTDOFW');
   g$mm packed(2:0);
   g$dd packed(2:0);
   g$yyyy packed(4:0);

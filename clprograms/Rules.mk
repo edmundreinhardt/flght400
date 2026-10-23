@@ -16,3 +16,4 @@ MSGPGM2.PGM: msgpgm2.clp MSGPANEL.FILE
 TESTIT.PGM: testit.clp
 USECLEAR.PGM: useclear.clp
 USERESET.PGM: usereset.clp
+CPYDATA.PGM: cpydata.clp

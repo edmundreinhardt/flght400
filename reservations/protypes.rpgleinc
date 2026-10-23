@@ -1,164 +1,192 @@
-      *-----------------------------------------------------------------
-      * PROTYPES.RPGLE - Shared program call prototypes
-      * Used by all FRS programs
-      *-----------------------------------------------------------------
-      * IBM system APIs
-      *-----------------------------------------------------------------
-     D QMHRMVPM        PR                  EXTPGM('QMHRMVPM')
-     D  MsgQ                         10A
-     D  MsgQCtr                       9B 0
-     D  MsgKey                        4A
-     D  RmvClr                       10A
-     D  ApiErr                      256A   OPTIONS(*VARSIZE)
-      *
-     D QMHSNDPM        PR                  EXTPGM('QMHSNDPM')
-     D  MsgId                         7A
-     D  MsgF                         20A
-     D  MsgDta                       80A
-     D  MsgDtaLen                     9B 0
-     D  MsgTyp                       10A
-     D  MsgQ                         10A
-     D  MsgQCtr                       9B 0
-     D  MsgKey                        4A
-     D  ApiErr                      256A   OPTIONS(*VARSIZE)
-      *
-     D QCMDEXC         PR                  EXTPGM('QCMDEXC')
-     D  Cmd                       32702A   OPTIONS(*VARSIZE)
-     D  CmdLen                       15P 5
-      *
-     D QUSCMDLN        PR                  EXTPGM('QUSCMDLN')
-      *
-     D QWCCVTDT        PR                  EXTPGM('QWCCVTDT')
-     D  FmtIn                        10A
-     D  DtIn                         16A
-     D  FmtOut                       10A
-     D  DtOut                        16A
-     D  ApiErr                      256A   OPTIONS(*VARSIZE)
-      *-----------------------------------------------------------------
-      * Application utility procedures (FUTIL service program)
-      *-----------------------------------------------------------------
-     D gregorianToJulian...
-     D                 PR             5P 0 EXTPROC('gregorianToJulian')
-     D  inMonth                       2P 0 CONST
-     D  inDay                         2P 0 CONST
-     D  inYear                        4P 0 CONST
-     D  outJulianDay                  5P 0 OPTIONS(*NOPASS)
-      *
-     D julianToGregorian...
-     D                 PR                  EXTPROC('julianToGregorian')
-     D  inJulianDay                   5P 0 CONST
-     D  outMonth                      2P 0
-     D  outDay                        2P 0
-     D  outYear                       4P 0
-      *
-     D getDayOfWeek    PR            16A   EXTPROC('getDayOfWeek')
-     D  inMonth                       2P 0 CONST
-     D  inDay                         2P 0 CONST
-     D  inYear                        4P 0 CONST
-     D  outDayOfWeek                 16A   OPTIONS(*NOPASS)
-      *
-     D getRandomNumber...
-     D                 PR             6P 0 EXTPROC('getRandomNumber')
-     D  inBeginNumber                 6P 0 CONST OPTIONS(*NOPASS)
-     D  inEndNumber                   6P 0 CONST OPTIONS(*NOPASS)
-     D  outRandomNumber...
-     D                                6P 0 OPTIONS(*NOPASS)
-      *
-     D initializeRandomSeed...
-     D                 PR                  EXTPROC('initializeRandomSeed')
-     D  Seed                          9P 9
-      *-----------------------------------------------------------------
-      * FRS application programs
-      *-----------------------------------------------------------------
-     D FRS001          PR                  EXTPGM('FRS001')
-     D  Agent#                        9P 0
-      *
-     D FRS002          PR                  EXTPGM('FRS002')
-     D  Agent#                        9P 0
-     D  Order#                        9P 0
-      *
-     D FRS003          PR                  EXTPGM('FRS003')
-     D  Agent#                        9P 0
-     D  Order#                        9P 0
-      *
-     D FRS004          PR                  EXTPGM('FRS004')
-     D  Agent#                        9P 0
-     D  Order#                        9P 0
-      *
-     D FRS005          PR                  EXTPGM('FRS005')
-     D  Agent#                        9P 0
-     D  Order#                        9P 0
-      *
-     D FRS009          PR                  EXTPGM('FRS009')
-     D  Agent#                        9P 0
-     D  RunTyp                        6A
-      *
-     D FRS401          PR                  EXTPGM('FRS401')
-     D  PAgent                       10A
-      *
-     D FRS402          PR                  EXTPGM('FRS402')
-     D  FrmCty                       16A
-     D  FrmInt                        3A
-     D  FrmAir                        3A
-      *
-     D FRS403          PR                  EXTPGM('FRS403')
-     D  PrmCty                       16A
-     D  PrmInt                        3A
-      *
-     D FRS404          PR                  EXTPGM('FRS404')
-     D  IFltKy                       58A
-     D  PFlght                        7P 0
-     D  PDpTim                       34A
-     D  PArTim                       34A
-     D  PAirLn                       34A
-     D  PPrice                       24A
-      *
-     D FRS405          PR                  EXTPGM('FRS405')
-     D  PCusNo                        9P 0
-     D  PCusNm                       25A
-      *
-     D FRS406          PR                  EXTPGM('FRS406')
-     D  Order#                        9P 0
-     D  EndYn                         1A
-      *
-     D FRS407          PR                  EXTPGM('FRS407')
-     D  PDepYY                        4P 0
-     D  PDepMM                        2P 0
-     D  PDepDD                        2P 0
-     D  POrdNo                        9P 0
-      *
-     D FRS408          PR                  EXTPGM('FRS408')
-     D  PCusNm                       25A
-     D  POrdNo                        9P 0
-      *
-     D FRS409          PR                  EXTPGM('FRS409')
-     D  Order#                        9P 0
-     D  EndYn                         1A
-      *
-     D FRS410          PR                  EXTPGM('FRS410')
-     D  Order#                        9P 0
-     D  EndYn                         1A
-      *
-     D MSGPRG          PR                  EXTPGM('MSGPRG')
-      *
-     D FRS411          PR                  EXTPGM('FRS411')
-      *
-     D FRS412          PR                  EXTPGM('FRS412')
-     D  PAirLn                       16A
-     D  PAirLi                        3A
-      *
-     D FRS413          PR                  EXTPGM('FRS413')
-     D  SFlght                        9P 0
-     D  SDyOwk                        9A
-     D  SFrCty                       16A
-     D  SToCty                       16A
-     D  SDptHH                        2A
-     D  SDptMM                        2A
-     D  SDptAP                        2A
-     D  SArrHH                        2A
-     D  SArrMM                        2A
-     D  SArrAP                        2A
-     D  SMiles                        5P 0
-     D  SAirIn                        3A
-     D  SSeats                        3P 0
-     D  SPrice                        3A
+**FREE
+// -----------------------------------------------------------------
+// PROTYPES.RPGLEINC - Shared program call prototypes
+// Used by all FRS programs
+// -----------------------------------------------------------------
+// IBM system APIs
+// -----------------------------------------------------------------
+DCL-PR QMHRMVPM EXTPGM('QMHRMVPM');
+  MsgQ        CHAR(10);
+  MsgQCtr     BINDEC(9:0);
+  MsgKey      CHAR(4);
+  RmvClr      CHAR(10);
+  ApiErr      CHAR(256) OPTIONS(*VARSIZE);
+END-PR;
+
+DCL-PR QMHSNDPM EXTPGM('QMHSNDPM');
+  MsgId       CHAR(7);
+  MsgF        CHAR(20);
+  MsgDta      CHAR(80);
+  MsgDtaLen   BINDEC(9:0);
+  MsgTyp      CHAR(10);
+  MsgQ        CHAR(10);
+  MsgQCtr     BINDEC(9:0);
+  MsgKey      CHAR(4);
+  ApiErr      CHAR(256) OPTIONS(*VARSIZE);
+END-PR;
+
+DCL-PR QCMDEXC EXTPGM('QCMDEXC');
+  Cmd         CHAR(32702) OPTIONS(*VARSIZE);
+  CmdLen      PACKED(15:5);
+END-PR;
+
+DCL-PR QUSCMDLN EXTPGM('QUSCMDLN');
+END-PR;
+
+DCL-PR QWCCVTDT EXTPGM('QWCCVTDT');
+  FmtIn       CHAR(10);
+  DtIn        CHAR(16);
+  FmtOut      CHAR(10);
+  DtOut       CHAR(16);
+  ApiErr      CHAR(256) OPTIONS(*VARSIZE);
+END-PR;
+
+// -----------------------------------------------------------------
+// Application utility procedures (FUTIL service program)
+// -----------------------------------------------------------------
+DCL-PR gregorianToJulian PACKED(5:0) EXTPROC('gregorianToJulian');
+  inMonth       PACKED(2:0) CONST;
+  inDay         PACKED(2:0) CONST;
+  inYear        PACKED(4:0) CONST;
+  outJulianDay  PACKED(5:0) OPTIONS(*NOPASS);
+END-PR;
+
+DCL-PR julianToGregorian EXTPROC('julianToGregorian');
+  inJulianDay   PACKED(5:0) CONST;
+  outMonth      PACKED(2:0);
+  outDay        PACKED(2:0);
+  outYear       PACKED(4:0);
+END-PR;
+
+DCL-PR getDayOfWeek CHAR(16) EXTPROC('getDayOfWeek');
+  inMonth       PACKED(2:0) CONST;
+  inDay         PACKED(2:0) CONST;
+  inYear        PACKED(4:0) CONST;
+  outDayOfWeek  CHAR(16) OPTIONS(*NOPASS);
+END-PR;
+
+DCL-PR getRandomNumber PACKED(6:0) EXTPROC('getRandomNumber');
+  inBeginNumber   PACKED(6:0) CONST OPTIONS(*NOPASS);
+  inEndNumber     PACKED(6:0) CONST OPTIONS(*NOPASS);
+  outRandomNumber PACKED(6:0) OPTIONS(*NOPASS);
+END-PR;
+
+DCL-PR initializeRandomSeed EXTPROC('initializeRandomSeed');
+  Seed  PACKED(9:9);
+END-PR;
+
+// -----------------------------------------------------------------
+// FRS application programs
+// -----------------------------------------------------------------
+DCL-PR FRS001 EXTPGM('FRS001');
+  Agent#  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS002 EXTPGM('FRS002');
+  Agent#  PACKED(9:0);
+  Order#  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS003 EXTPGM('FRS003');
+  Agent#  PACKED(9:0);
+  Order#  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS004 EXTPGM('FRS004');
+  Agent#  PACKED(9:0);
+  Order#  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS005 EXTPGM('FRS005');
+  Agent#  PACKED(9:0);
+  Order#  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS009 EXTPGM('FRS009');
+  Agent#  PACKED(9:0);
+  RunTyp  CHAR(6);
+END-PR;
+
+DCL-PR FRS401 EXTPGM('FRS401');
+  PAgent  CHAR(10);
+END-PR;
+
+DCL-PR FRS402 EXTPGM('FRS402');
+  FrmCty  CHAR(16);
+  FrmInt  CHAR(3);
+  FrmAir  CHAR(3);
+END-PR;
+
+DCL-PR FRS403 EXTPGM('FRS403');
+  PrmCty  CHAR(16);
+  PrmInt  CHAR(3);
+END-PR;
+
+DCL-PR FRS404 EXTPGM('FRS404');
+  IFltKy  CHAR(58);
+  PFlght  PACKED(7:0);
+  PDpTim  CHAR(34);
+  PArTim  CHAR(34);
+  PAirLn  CHAR(34);
+  PPrice  CHAR(24);
+END-PR;
+
+DCL-PR FRS405 EXTPGM('FRS405');
+  PCusNo  PACKED(9:0);
+  PCusNm  CHAR(25);
+END-PR;
+
+DCL-PR FRS406 EXTPGM('FRS406');
+  Order#  PACKED(9:0);
+  EndYn   CHAR(1);
+END-PR;
+
+DCL-PR FRS407 EXTPGM('FRS407');
+  PDepYY  PACKED(4:0);
+  PDepMM  PACKED(2:0);
+  PDepDD  PACKED(2:0);
+  POrdNo  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS408 EXTPGM('FRS408');
+  PCusNm  CHAR(25);
+  POrdNo  PACKED(9:0);
+END-PR;
+
+DCL-PR FRS409 EXTPGM('FRS409');
+  Order#  PACKED(9:0);
+  EndYn   CHAR(1);
+END-PR;
+
+DCL-PR FRS410 EXTPGM('FRS410');
+  Order#  PACKED(9:0);
+  EndYn   CHAR(1);
+END-PR;
+
+DCL-PR MSGPRG EXTPGM('MSGPRG');
+END-PR;
+
+DCL-PR FRS411 EXTPGM('FRS411');
+END-PR;
+
+DCL-PR FRS412 EXTPGM('FRS412');
+  PAirLn  CHAR(16);
+  PAirLi  CHAR(3);
+END-PR;
+
+DCL-PR FRS413 EXTPGM('FRS413');
+  SFlght  PACKED(9:0);
+  SDyOwk  CHAR(9);
+  SFrCty  CHAR(16);
+  SToCty  CHAR(16);
+  SDptHH  CHAR(2);
+  SDptMM  CHAR(2);
+  SDptAP  CHAR(2);
+  SArrHH  CHAR(2);
+  SArrMM  CHAR(2);
+  SArrAP  CHAR(2);
+  SMiles  PACKED(5:0);
+  SAirIn  CHAR(3);
+  SSeats  PACKED(3:0);
+  SPrice  CHAR(3);
+END-PR;

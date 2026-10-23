@@ -1,27 +1,29 @@
-# Layer 0 -- Physical Files
-AGENTS.FILE: agents.pf
-AIRLINE.FILE: airline.pf
-CUSTOMERS.FILE: customers.pf
-FLIGHTS.FILE: flights.pf
-FNAME.FILE: fname.pf
-FNEXTO.FILE: fnexto.pf
-FRCITY.FILE: frcity.pf
-LNAME.FILE: lname.pf
-ORDERS.FILE: orders.pf
-TOCITY.FILE: tocity.pf
+# Layer 0 -- Tables (formerly Physical Files)
+AGENTS.FILE:    agents.table
+AIRLINE.FILE:   airline.table
+CUSTOMERS.FILE: customers.table
+FLIGHTS.FILE:   flights.table
+FNAME.FILE:     fname.table
+FNEXTO.FILE:    fnexto.table
+FRCITY.FILE:    frcity.table
+LNAME.FILE:     lname.table
+ORDERS.FILE:    orders.table
+TOCITY.FILE:    tocity.table
 
-# Layer 1 -- Logical Files
-AGENTSL.FILE: agentsl.lf AGENTS.FILE
-AGENTSZ.FILE: agentsz.lf AGENTS.FILE
-AIRLINEL.FILE: airlinel.lf AIRLINE.FILE
-CUSTOMER.FILE: customer.lf CUSTOMERS.FILE
-CUSTNAME.FILE: custname.lf CUSTOMERS.FILE
-CUSTOMRZ.FILE: customrz.lf CUSTOMERS.FILE
-FLIGHTSL.FILE: flightsl.lf FLIGHTS.FILE
-FLIGHTSZ.FILE: flightsz.lf FLIGHTS.FILE
-FRCITYL.FILE: frcityl.lf FRCITY.FILE
-ORDERSZ.FILE: ordersz.lf ORDERS.FILE
-TOCITYL.FILE: tocityl.lf TOCITY.FILE
-CUSTORD.FILE: custord.lf CUSTOMERS.FILE ORDERS.FILE
-ORDDATE.FILE: orddate.lf ORDERS.FILE CUSTOMERS.FILE
-ORDNAME.FILE: ordname.lf ORDERS.FILE CUSTOMERS.FILE
+# Layer 1 -- Indexes (formerly Logical Files with alternate key only)
+AGENTSL.FILE:   agentsl.index  AGENTS.FILE
+AGENTSZ.FILE:   agentsz.index  AGENTS.FILE
+AIRLINEL.FILE:  airlinel.index AIRLINE.FILE
+CUSTOMER.FILE:  customer.index CUSTOMERS.FILE
+CUSTNAME.FILE:  custname.index CUSTOMERS.FILE
+CUSTOMRZ.FILE:  customrz.index CUSTOMERS.FILE
+FLIGHTSL.FILE:  flightsl.index FLIGHTS.FILE
+FLIGHTSZ.FILE:  flightsz.index FLIGHTS.FILE
+FRCITYL.FILE:   frcityl.index  FRCITY.FILE
+ORDERSZ.FILE:   ordersz.index  ORDERS.FILE
+TOCITYL.FILE:   tocityl.index  TOCITY.FILE
+
+# Layer 1 -- Views (formerly Join Logical Files)
+CUSTORD.FILE:   custord.view  CUSTOMERS.FILE ORDERS.FILE
+ORDDATE.FILE:   orddate.view  ORDERS.FILE CUSTOMERS.FILE
+ORDNAME.FILE:   ordname.view  ORDERS.FILE CUSTOMERS.FILE

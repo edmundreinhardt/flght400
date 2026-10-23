@@ -1,0 +1,4 @@
+-- Airline Customers by Descending Number
+CREATE INDEX CUSTOMER
+    ON CUSTOMERS (CUSTOMER_NO DESC)
+    RCDFMT CUSTR;

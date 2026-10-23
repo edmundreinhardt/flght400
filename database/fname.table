@@ -1,0 +1,5 @@
+-- First Name Table for building Customer file
+CREATE OR REPLACE TABLE FNAME (
+    FRSTNM  CHAR(10)    NOT NULL,
+    CONSTRAINT FNAME_PK PRIMARY KEY (FRSTNM)
+) RCDFMT FNAMER;

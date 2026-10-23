@@ -1,0 +1,4 @@
+-- Airline Agents Binary converted to Zoned (keyed by AGENT_NO)
+CREATE INDEX AGENTSZ
+    ON AGENTS (AGENT_NO ASC)
+    RCDFMT AGNTRZ;

@@ -1,0 +1,4 @@
+-- City table for building Flights (From City) by Initials
+CREATE UNIQUE INDEX FRCITYL
+    ON FRCITY (FRCINT ASC)
+    RCDFMT FRCTYL;

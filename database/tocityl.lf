@@ -1,8 +1,0 @@
-      *%METADATA                                                       *
-      * %TEXT City table for building Flights (To City)                *
-      *%EMETADATA                                                      *
-                                            UNIQUE
-                R TOCTYL                    PFILE(TOCITY)
-                  TOCNAM    R
-                  TOCINT    R
-                K TOCINT

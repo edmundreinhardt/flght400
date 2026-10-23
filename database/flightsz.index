@@ -1,0 +1,4 @@
+-- Flight schedule Binary converted to Zoned (keyed by FLIGHT_NUMBER)
+CREATE INDEX FLIGHTSZ
+    ON FLIGHTS (FLIGHT_NUMBER ASC)
+    RCDFMT FLGHTR;

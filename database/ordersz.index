@@ -1,0 +1,4 @@
+-- Airline Orders converted to Zoned (keyed by ORDER_NUMBER)
+CREATE INDEX ORDERSZ
+    ON ORDERS (ORDER_NUMBER ASC)
+    RCDFMT ORDNMZ;

@@ -1,0 +1,4 @@
+-- Airline Customers by Name
+CREATE INDEX CUSTNAME
+    ON CUSTOMERS (CUSTOMER_NAME ASC)
+    RCDFMT CUSTR;

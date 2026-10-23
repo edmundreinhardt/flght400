@@ -1,0 +1,8 @@
+-- City table for building Flights (From City)
+CREATE OR REPLACE TABLE FRCITY (
+    FRCNAM  CHAR(16)        NOT NULL,
+    FRCINT  CHAR(3)         NOT NULL,
+    FRCALN  CHAR(3)         NOT NULL,
+    FRCNBR  DECIMAL(3, 0)   NOT NULL,
+    CONSTRAINT FRCITY_PK PRIMARY KEY (FRCNAM)
+) RCDFMT FRCTYR;

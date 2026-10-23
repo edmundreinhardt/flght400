@@ -1,8 +1,0 @@
-      *%METADATA                                                       *
-      * %TEXT Last Name Table for building Customer file               *
-      *%EMETADATA                                                      *
-                                            UNIQUE
-                R NAMER
-                  LASTNM        15A         TEXT('LAST NAME')
-                                            COLHDG('LAST NAME')
-                K LASTNM

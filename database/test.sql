@@ -1,0 +1,1 @@
+select *  from FLGHT400_O/LNAME

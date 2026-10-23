@@ -1,0 +1,4 @@
+-- Airline Customers Binary converted to Zoned (keyed by CUSTOMER_NO)
+CREATE INDEX CUSTOMRZ
+    ON CUSTOMERS (CUSTOMER_NO ASC)
+    RCDFMT CUSTZ;

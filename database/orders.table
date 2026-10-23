@@ -1,0 +1,12 @@
+-- Airline Orders
+CREATE OR REPLACE TABLE ORDERS (
+    ORDER_NUMBER                INTEGER         NOT NULL,
+    AGENT_NO                    INTEGER,
+    CUSTOMER_NO                 INTEGER,
+    FLIGHT_NUMBER               INTEGER,
+    DEPARTURE_DATE              DATE,
+    TICKETS_ORDERED             INTEGER,
+    CLASS                       VARCHAR(1)      CCSID 37,
+    SEND_SIGNATURE_WITH_ORDER   VARCHAR(16)     CCSID 37,
+    CONSTRAINT ORDERS_PK PRIMARY KEY (ORDER_NUMBER)
+) RCDFMT ORDERS;

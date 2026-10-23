@@ -1,0 +1,4 @@
+-- Airline Table for validation by Initials
+CREATE UNIQUE INDEX AIRLINEL
+    ON AIRLINE (AIRLIN ASC)
+    RCDFMT AIRLNL;

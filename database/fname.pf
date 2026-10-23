@@ -1,8 +1,0 @@
-      *%METADATA                                                       *
-      * %TEXT First Name Table for building Customer file              *
-      *%EMETADATA                                                      *
-                                            UNIQUE
-                R FNAMER
-                  FRSTNM        10A         TEXT('FIRST NAME')
-                                            COLHDG('FIRST NAME')
-                K FRSTNM

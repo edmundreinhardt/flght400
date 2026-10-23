@@ -1,0 +1,4 @@
+-- Airline Agents by Name
+CREATE INDEX AGENTSL
+    ON AGENTS (AGENT_NAME ASC)
+    RCDFMT ANAMER;

@@ -1,0 +1,5 @@
+-- Last Name Table for building Customer file
+CREATE OR REPLACE TABLE LNAME (
+    LASTNM  CHAR(15)    NOT NULL,
+    CONSTRAINT LNAME_PK PRIMARY KEY (LASTNM)
+) RCDFMT NAMER;

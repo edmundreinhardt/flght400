@@ -1,0 +1,4 @@
+-- City table for building Flights (To City) by Initials
+CREATE UNIQUE INDEX TOCITYL
+    ON TOCITY (TOCINT ASC)
+    RCDFMT TOCTYL;

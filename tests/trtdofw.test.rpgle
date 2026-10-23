@@ -21,6 +21,13 @@ dcl-pr rtdofw_mod extpgm('FLGHT400_O/RTDOFW');
   dayowk char(16);
 end-pr;
 
+// ILE extproc prototype — return value form (no out-parameter)
+dcl-pr getDayOfWeek char(16) extproc('getDayOfWeek');
+  inMonth  packed(2:0) const;
+  inDay    packed(2:0) const;
+  inYear   packed(4:0) const;
+end-pr;
+
 // Helper procedure to assert equivalence for a given date
 dcl-proc assertRtdofwEquiv;
   dcl-pi *n;
@@ -133,4 +140,71 @@ dcl-proc test_full_year_sequential_days export;
       assertRtdofwEquiv(m : d : 2024);
     endfor;
   endfor;
+end-proc;
+
+//----------------------------------------------------------------------
+// Test 5: Return-value form — 3-param extproc call (no out-parameter)
+//
+// getDayOfWeek also returns the day name as a function value.
+// All existing tests call it via extpgm wrappers that always pass the
+// 4th *nopass out-parameter.  This test exercises the ILE extproc path
+// where only 3 parameters are passed and the result is captured purely
+// from the return value, verifying %parms-guarded out-parameter write
+// is skipped without altering the returned day name.
+//----------------------------------------------------------------------
+dcl-proc test_return_value_form export;
+  dcl-pi *n extproc(*dclcase) end-pi;
+
+  dcl-s dayRet  char(16);
+  dcl-s dayOut  char(16);
+  dcl-s mm      packed(2:0);
+  dcl-s dd      packed(2:0);
+  dcl-s yyyy    packed(4:0);
+
+  // For each date, confirm the return value equals the out-parameter value
+  // produced by the same call with 4 params (via existing extpgm wrapper).
+  // A mismatch would mean the %parms branch corrupts the return path.
+
+  // 2024-10-09 — Wednesday (ground truth verified in test_seven_days_of_week)
+  mm = 10; dd = 9; yyyy = 2024;
+  dayOut = *blanks;
+  rtdofw_orig(mm : dd : yyyy : dayOut);
+  dayRet = getDayOfWeek(mm : dd : yyyy);
+  assertEqual(dayOut : dayRet : 'Return value 2024-10-09 Wednesday');
+
+  // 2024-10-06 — Sunday
+  mm = 10; dd = 6; yyyy = 2024;
+  dayOut = *blanks;
+  rtdofw_orig(mm : dd : yyyy : dayOut);
+  dayRet = getDayOfWeek(mm : dd : yyyy);
+  assertEqual(dayOut : dayRet : 'Return value 2024-10-06 Sunday');
+
+  // 2024-02-29 — Thursday (leap day)
+  mm = 2; dd = 29; yyyy = 2024;
+  dayOut = *blanks;
+  rtdofw_orig(mm : dd : yyyy : dayOut);
+  dayRet = getDayOfWeek(mm : dd : yyyy);
+  assertEqual(dayOut : dayRet : 'Return value 2024-02-29 leap Thursday');
+
+  // 2000-01-01 — Saturday (Y2K)
+  mm = 1; dd = 1; yyyy = 2000;
+  dayOut = *blanks;
+  rtdofw_orig(mm : dd : yyyy : dayOut);
+  dayRet = getDayOfWeek(mm : dd : yyyy);
+  assertEqual(dayOut : dayRet : 'Return value 2000-01-01 Saturday');
+
+  // 1969-07-20 — Sunday (Moon Landing)
+  mm = 7; dd = 20; yyyy = 1969;
+  dayOut = *blanks;
+  rtdofw_orig(mm : dd : yyyy : dayOut);
+  dayRet = getDayOfWeek(mm : dd : yyyy);
+  assertEqual(dayOut : dayRet : 'Return value 1969-07-20 Sunday');
+
+  // 2026-10-09 — Friday
+  mm = 10; dd = 9; yyyy = 2026;
+  dayOut = *blanks;
+  rtdofw_orig(mm : dd : yyyy : dayOut);
+  dayRet = getDayOfWeek(mm : dd : yyyy);
+  assertEqual(dayOut : dayRet : 'Return value 2026-10-09 Friday');
+
 end-proc;

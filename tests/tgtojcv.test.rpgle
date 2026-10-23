@@ -21,6 +21,13 @@ dcl-pr gtojcv_mod extpgm('GTOJCV');
   g$jd packed(5:0);
 end-pr;
 
+// ILE extproc prototype — return value form (no out-parameter)
+dcl-pr gregorianToJulian packed(5:0) extproc('gregorianToJulian');
+  inMonth  packed(2:0) const;
+  inDay    packed(2:0) const;
+  inYear   packed(4:0) const;
+end-pr;
+
 // Helper procedure to assert equivalence for a given date
 dcl-proc assertGtojcvEquiv;
   dcl-pi *n;
@@ -165,4 +172,71 @@ dcl-proc test_full_year_sequential_scan export;
       assertGtojcvEquiv(m : d : 2024 : 'Year 2024 scan');
     endfor;
   endfor;
+end-proc;
+
+//----------------------------------------------------------------------
+// Test 6: Return-value form — 3-param extproc call (no out-parameter)
+//
+// gregorianToJulian also returns the Julian day as a function value.
+// All existing tests call it via extpgm wrappers that always pass the
+// 4th *nopass out-parameter.  This test exercises the ILE extproc path
+// where only 3 parameters are passed and the result is captured purely
+// from the return value, verifying %parms-guarded out-parameter write
+// is skipped without altering the returned day number.
+//----------------------------------------------------------------------
+dcl-proc test_return_value_form export;
+  dcl-pi *n extproc(*dclcase) end-pi;
+
+  dcl-s jdRet  packed(5:0);
+  dcl-s jdOut  packed(5:0);
+  dcl-s mm     packed(2:0);
+  dcl-s dd     packed(2:0);
+  dcl-s yyyy   packed(4:0);
+
+  // For each date, confirm the return value equals the out-parameter value
+  // produced by the same call with 4 params (via existing extpgm wrapper).
+  // A mismatch would mean the %parms branch corrupts the return path.
+
+  // 2024-07-04 (Thursday)
+  mm = 7; dd = 4; yyyy = 2024;
+  jdOut = 0;
+  gtojcv_mod(mm : dd : yyyy : jdOut);
+  jdRet = gregorianToJulian(mm : dd : yyyy);
+  assertEqual(jdOut : jdRet : 'Return value 2024-07-04');
+
+  // 2024-01-01 (Jan — monthSaved < 0 branch)
+  mm = 1; dd = 1; yyyy = 2024;
+  jdOut = 0;
+  gtojcv_mod(mm : dd : yyyy : jdOut);
+  jdRet = gregorianToJulian(mm : dd : yyyy);
+  assertEqual(jdOut : jdRet : 'Return value 2024-01-01');
+
+  // 2024-02-29 (Feb — monthSaved < 0 branch, leap day)
+  mm = 2; dd = 29; yyyy = 2024;
+  jdOut = 0;
+  gtojcv_mod(mm : dd : yyyy : jdOut);
+  jdRet = gregorianToJulian(mm : dd : yyyy);
+  assertEqual(jdOut : jdRet : 'Return value 2024-02-29 leap');
+
+  // 2024-03-01 (Mar — monthSaved = 0 branch)
+  mm = 3; dd = 1; yyyy = 2024;
+  jdOut = 0;
+  gtojcv_mod(mm : dd : yyyy : jdOut);
+  jdRet = gregorianToJulian(mm : dd : yyyy);
+  assertEqual(jdOut : jdRet : 'Return value 2024-03-01');
+
+  // 2000-01-01 (Y2K)
+  mm = 1; dd = 1; yyyy = 2000;
+  jdOut = 0;
+  gtojcv_mod(mm : dd : yyyy : jdOut);
+  jdRet = gregorianToJulian(mm : dd : yyyy);
+  assertEqual(jdOut : jdRet : 'Return value 2000-01-01');
+
+  // 1969-07-20 (Moon Landing)
+  mm = 7; dd = 20; yyyy = 1969;
+  jdOut = 0;
+  gtojcv_mod(mm : dd : yyyy : jdOut);
+  jdRet = gregorianToJulian(mm : dd : yyyy);
+  assertEqual(jdOut : jdRet : 'Return value 1969-07-20');
+
 end-proc;

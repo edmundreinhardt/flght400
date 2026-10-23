@@ -149,7 +149,7 @@ FRS000 acts as the **single point of entry and security enforcement** for the en
 - The logon screen loop ends
 - The program closes and returns control to the calling system
 
-**Related Data:** Internal exit flag (`@EXIT`)
+**Related Data:** Internal exit flag (`exitFlag`)
 
 ---
 
@@ -170,8 +170,8 @@ FRS000 acts as the **single point of entry and security enforcement** for the en
 | **DSPLAY** | FRS009 | Display / view a reservation |
 | **DELETE** | FRS009 | Delete a reservation |
 | **FAX** | FRS009 | Fax a reservation |
-| **MAINT** | System Command (`CRTCMD`) | Run system maintenance |
-| **REPORT** | System Command (`CRTCM2`) | Generate a report |
+| **MAINT** | System Command (`GO FLGHT400/FRSMANT`) | Run system maintenance |
+| **REPORT** | System Command (`GO FLGHT400/FRSREPT`) | Generate a report |
 
 **Trigger Conditions:**
 - The agent has successfully completed authentication (pressed F10 and all validations passed)
@@ -219,9 +219,9 @@ The following validations are applied when the agent attempts to proceed past th
 
 | Calculation | Purpose | Formula | Inputs | Output |
 |---|---|---|---|---|
-| **Agent Number Format Conversion** | Converts the agent number from its stored text format to a numeric value suitable for passing to reservation programs | Move the stored agent number field into a numeric variable | `AGENTSL.AGNMBR` (stored as text, positions 1–4 of the agent record) | Numeric agent identifier passed to FRS001 / FRS009 |
+| **Agent Number Format Conversion** | Converts the agent number from its DDS-defined binary format to a packed decimal value suitable for passing to reservation programs | Direct assignment (`agentNumber = AGNMBR`) | `AGENTSL.AGNMBR` (4-byte binary integer, externally described) | Packed decimal agent identifier passed to FRS001 / FRS009 |
 
-> ⚠️ **Note:** This conversion is a required step before any downstream program can be called. The agents master file stores the agent number as a character field; reservation programs require it in numeric form.
+> ℹ️ **Note:** This conversion is a required step before any downstream program can be called. `AGNMBR` is a binary integer field in the externally described `AGENTSL` file; the downstream program prototypes declare the agent number as `PACKED(9:0)`, so RPG performs the type conversion automatically on assignment.
 
 ---
 
@@ -339,9 +339,9 @@ The agents master file (`AGENTSL`) is the authoritative source for agent identit
 | Rule | Business Meaning |
 |---|---|
 | **Agent number is unique** | Every agent has a distinct identifier; no two agents share a number |
-| **Agent name is the lookup key** | Logon lookups are performed by agent name (positions 5–70 of the record) |
-| **Each record is exactly 136 characters** | The file has a fixed layout; agent number occupies the first 4 characters, name the next 66, and password the final 66 |
-| **Password is stored per agent** | Each agent's password is held within their own record, tied to their name and number |
+| **Agent name is the lookup key** | Logon lookups are performed by agent name (`AGNAME` field, externally described) |
+| **File is externally described** | `AGENTSL` is a DDS-keyed logical file over `AGENTS`; field definitions (`AGNMBR`, `AGNAME`, `AGPASS`) come from the database — not from the RPG source |
+| **Password is stored per agent** | Each agent's password (`AGPASS`) is held within their own record, tied to their name and number |
 
 
 ## 🔒 Referential Integrity at Logon
@@ -354,7 +354,7 @@ The agents master file (`AGENTSL`) is the authoritative source for agent identit
 ## 🔄 Session State Integrity
 
 - **Error indicators are explicitly cleared** when the agent refreshes (F2), preventing stale error states from blocking a new, valid submission
-- The **exit flag (`@EXIT`)** is the sole mechanism for ending the logon loop; it can only be set by F3 or F12, ensuring the loop cannot exit unexpectedly
+- The **exit flag (`exitFlag`)** is the sole mechanism for ending the logon loop; it can only be set by F3 or F12, ensuring the loop cannot exit unexpectedly
 - The program sets a **program-end flag** only after the logon loop has fully completed, ensuring no partial or interrupted session leaves the program in an undefined state
 
 ---
@@ -463,9 +463,9 @@ flowchart TD
 | Agent must exist in `AGENTSL` before password is checked | A file lookup (`CHAIN`) is performed; not-found condition triggers error FRS0052 |
 | Password is matched against the file record | Direct comparison of entered password with `AGPASS` is coded |
 | F10 is blocked when error indicator 50 is active | Conditional check on indicator 50 before running the confirmation routine |
-| F2 resets screen, clears indicators 50/51/52 and message queue | All three actions are explicitly coded in the F2 routine |
-| F3 and F12 both set the same exit flag | Both key handlers move the `@TRUE` constant to `@EXIT` |
-| Operation type is received from the calling program as a 6-character parameter | Parameter declaration `PARM RUNTYP 6` is explicit |
+| F2 resets screen, clears indicators 50/51/52 and message queue | All three actions are explicitly coded in the `handleRefresh` procedure |
+| F3 and F12 both set the same exit flag | Both call `handleExit()`, which sets `exitFlag = EXIT_YES` |
+| Operation type is received from the calling program as a 6-character parameter | `DCL-PI` entry parameter `runType CHAR(6)` |
 | Routing logic dispatches to FRS001 (CREATE) or FRS009 (UPDATE/DSPLAY/DELETE/FAX) | `SELECT/WHEN` logic with program calls is coded explicitly |
 
 ---
@@ -489,7 +489,7 @@ flowchart TD
 |---|---|
 | **F4 and F9 comments** | Source code comments on the F4 and F9 keys incorrectly read "F03 EXIT," suggesting a copy-paste error during development. The actual behavior has been documented from the code logic, but a business owner should confirm the intended comment and any documentation downstream |
 | **RUNTYP = 'D' (Delete)** | A code comment references `D=DELETE` as a run type shorthand, but the routing logic uses the full word `DELETE`. It is unclear whether a single-character `D` is also a valid input or whether this is an outdated comment |
-| **AGENTSL vs. AGENTS master file** | The logon program reads agent credentials from `AGENTSL` using a 136-byte fixed layout keyed on agent name, while the underlying physical file (`AGENTS`) has a different field structure keyed on agent number. Whether these two files are always synchronized — and who is responsible for maintaining them — should be confirmed |
+| **AGENTSL vs. AGENTS master file** | `AGENTSL` is an externally described logical file (keyed on agent name) built over the `AGENTS` physical file (keyed on agent number). The logon program now reads field definitions directly from DDS — the 136-byte program-described layout has been removed. Whether the two files are always synchronized, and who is responsible for maintaining `AGENTS`, should still be confirmed with the business |
 | **Password storage** | Passwords are stored directly in the agents file. Business and compliance stakeholders should confirm whether any encryption or masking is applied at the file level, as this is not visible in the logon program itself |
 | **Who may use F9 (Command Line)?** | The F9 key is available to any user on the logon screen, even before authentication. Business owners should confirm whether this is intentional or whether command line access should require prior authentication |
 

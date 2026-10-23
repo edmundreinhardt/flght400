@@ -1,8 +1,8 @@
 {
   "version": "1.0.0",
   "description": "Flight 400 - IBM i airline reservation system (ILE modernised)",
-  "objlib": "FLGHT400F",
-  "curlib": "FLGHT400F",
+  "objlib": "FLGHT400",
+  "curlib": "FLGHT400",
   "includePath": ["reservations"],
   "postUsrlibl": ["RPGUNIT"],
   "buildCommand": "makei build",

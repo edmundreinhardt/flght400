@@ -2,288 +2,354 @@
 // ============================================================
 // Program  : FRS000
 // Purpose  : Flight Reservations - Logon / Entry Screen
-// Converted: Fixed-form RPGLE to fully free-format RPGLE
+//
+// Refactored: subroutines -> subprocedures with parameters,
+//             short cryptic names -> descriptive identifiers,
+//             API parameters encapsulated inside procedures.
 //
 // Conversion notes:
-//   - AGENTSL was declared as program-described (F) in the original
-//     F-spec but the *FILE object has external DDS (PROGRAM_DESCRIBED=NO).
-//     Re-declared as DISK(*EXT) KEYED - I-specs removed, fields resolve
-//     from DDS (AGNMBR, AGNAME, AGPASS).
-//   - AGNKEY/PWDKEY variable-length key DSes removed; CHAIN now uses
-//     AGNTNM directly on the externally described keyed file.
-//   - CHECKR/MOVEL key-build pattern replaced by direct field comparison.
+//   - AGENTSL has external DDS; re-declared as DISK(*EXT) KEYED.
+//   - I-specs and program-described key DSes removed; fields
+//     resolve directly from DDS (AGNMBR, AGNAME, AGPASS).
 // ============================================================
 
 CTL-OPT DFTACTGRP(*NO) ACTGRP(*CALLER);
 
 // ---- File Declarations -------------------------------------
-DCL-F FRS000DF WORKSTN INFDS(WSDS);
-DCL-F AGENTSL DISK(*EXT) KEYED USAGE(*INPUT);
+DCL-F FRS000DF WORKSTN INFDS(wsInfoDs);
+DCL-F AGENTSL  DISK(*EXT) KEYED USAGE(*INPUT);
 
-// ---- Named Constants ---------------------------------------
-DCL-C @F01   X'31';
-DCL-C @F02   X'32';
-DCL-C @F03   X'33';
-DCL-C @F04   X'34';
-DCL-C @F09   X'39';
-DCL-C @F10   X'3A';
-DCL-C @F12   X'3C';
-DCL-C @ENTER X'F1';
-DCL-C @HELP  X'F3';
-DCL-C @PRINT X'F6';
+// ---- Workstation Feedback Data Structure -------------------
+// Captures the AID key byte that caused the last EXFMT to return.
+DCL-DS wsInfoDs;
+  pressedKey  CHAR(1)  POS(369);
+END-DS;
 
-DCL-C APOST  X'7D';
+// ---- AID Key Constants (EBCDIC byte values) ----------------
+DCL-C KEY_F1     X'31';
+DCL-C KEY_F2     X'32';
+DCL-C KEY_F3     X'33';
+DCL-C KEY_F4     X'34';
+DCL-C KEY_F9     X'39';
+DCL-C KEY_F10    X'3A';
+DCL-C KEY_F12    X'3C';
+DCL-C KEY_ENTER  X'F1';
+DCL-C KEY_HELP   X'F3';
+DCL-C KEY_PRINT  X'F6';
 
-DCL-C @FALSE '0';
-DCL-C @TRUE  '1';
+DCL-C APOSTROPHE X'7D';
+
+// ---- Exit-Flag Constants -----------------------------------
+DCL-C EXIT_NO  '0';
+DCL-C EXIT_YES '1';
 
 // ---- Program Status Data Structure -------------------------
 DCL-DS *N PSDS;
-  @PGM    CHAR(10)   POS(1);
-  @STAT   ZONED(5:0) POS(11);
-  @PARMS  ZONED(3:0) POS(37);
-  @MSGID  CHAR(7)    POS(40);
-  @DATA   CHAR(79)   POS(91);
-  @JOBNA  CHAR(10)   POS(244);
-  @USRNA  CHAR(10)   POS(254);
-  @JOBNO  CHAR(6)    POS(264);
-  @SRCF   CHAR(10)   POS(304);
-  @SRCL   CHAR(10)   POS(314);
-  @SRCM   CHAR(10)   POS(324);
+  programName    CHAR(10)    POS(1);
+  programStatus  ZONED(5:0)  POS(11);
+  parmCount      ZONED(3:0)  POS(37);
+  statusMsgId    CHAR(7)     POS(40);
+  statusData     CHAR(79)    POS(91);
+  jobName        CHAR(10)    POS(244);
+  jobUser        CHAR(10)    POS(254);
+  jobNumber      CHAR(6)     POS(264);
+  sourceFile     CHAR(10)    POS(304);
+  sourceLib      CHAR(10)    POS(314);
+  sourceMember   CHAR(10)    POS(324);
 END-DS;
 
 // ---- API Error Data Structure ------------------------------
-DCL-DS APIERR;
-  ERRSIZ  BINDEC(9:0)  INZ(256);
-  ERRLEN  BINDEC(9:0)  INZ(0);
-  ERRMIC  CHAR(7)      INZ;
-  ERRNBR  CHAR(1)      INZ;
-  ERRDTA  CHAR(240)    INZ;
+// Shared by all QMHRMVPM / QMHSNDPM calls.
+DCL-DS apiError;
+  errorBufferSize  BINDEC(9:0)  INZ(256);
+  errorLength      BINDEC(9:0)  INZ(0);
+  errorMessageId   CHAR(7)      INZ;
+  errorNbr         CHAR(1)      INZ;
+  errorData        CHAR(240)    INZ;
 END-DS;
 
-// ---- Send Message Parameters --------------------------------
-DCL-S MSGCTR  BINDEC(9:0) INZ(0);
-DCL-S MSGLEN  BINDEC(9:0) INZ(80);
-DCL-S MSGF    CHAR(20)    INZ('FRSMSGF   FLGHT400  ');
-DCL-S MSGTYP  CHAR(10)    INZ('*INFO     ');
-
-// ---- Remove Message Parameters ------------------------------
-DCL-S RMVCTR  BINDEC(9:0) INZ(0);
-DCL-S RMVMSQ  CHAR(10)    INZ('*         ');
-DCL-S RMVCLR  CHAR(10)    INZ('*ALL      ');
-DCL-S RMVKEY  CHAR(4)     INZ('    ');
-
-// ---- Workstation INFDS -------------------------------------
-DCL-DS WSDS;
-  KEY  CHAR(1)  POS(369);
-END-DS;
-
-// ---- Command Data Structures --------------------------------
-DCL-DS CRTCMD;
-  GOCMD1  CHAR(19) INZ('GO FLGHT400/FRSMANT');
-END-DS;
-
-DCL-DS CRTCM2;
-  GOCMD2  CHAR(19) INZ('GO FLGHT400/FRSREPT');
-END-DS;
+// ---- Program-Level Exit Flag --------------------------------
+DCL-S exitFlag  CHAR(1)  INZ(EXIT_NO);
 
 // ---- Prototypes (external copy) ----------------------------
 /COPY 'protypes.rpgleinc'
 
+// ---- Prototypes: local subprocedures -----------------------
+DCL-PR initialize        END-PR;
+
+DCL-PR validateLogon     IND  END-PR;
+
+DCL-PR removeMessages    END-PR;
+
+DCL-PR sendMessage;
+  p_messageId  CHAR(7)  CONST;
+END-PR;
+
+DCL-PR handleRefresh     END-PR;
+
+DCL-PR handleExit        END-PR;
+
+DCL-PR handleAgentSelect END-PR;
+
+DCL-PR handleCommandLine END-PR;
+
+DCL-PR processEntry;
+  p_agentNumber  PACKED(9:0)  VALUE;
+  p_runType      CHAR(6)      CONST;
+END-PR;
+
+DCL-PR processMaintMenu  END-PR;
+
+DCL-PR processReportMenu END-PR;
+
 // ---- Program Entry Interface --------------------------------
 DCL-PI *N;
-  RUNTYP  CHAR(6);
+  runType  CHAR(6);
 END-PI;
-
-// ---- Standalone Variables -----------------------------------
-DCL-S @EXIT   CHAR(1);
-DCL-S CMDLEN  PACKED(15:5);
-DCL-S AGENT#  PACKED(9:0);
-DCL-S MSGID   CHAR(7)   INZ;
-DCL-S MSGDTA  CHAR(80)  INZ;
-DCL-S MSGQUE  CHAR(10)  INZ;
 
 // ---- Main Logic --------------------------------------------
 RESET LOGONR;
-EXSR INZSR;
+initialize();
 
-DOU @EXIT = @TRUE;
+DOU exitFlag = EXIT_YES;
 
   WRITE MSGCTL;
   EXFMT LOGONR;
 
-  IF KEY = @F02;
-    EXSR @F02SR;
-  ELSEIF KEY = @F03;
-    EXSR @F03SR;
-  ELSEIF KEY = @F04;
-    EXSR @F04SR;
-  ELSEIF KEY = @F09;
-    EXSR @F09SR;
-  ELSEIF KEY = @F12;
-    EXSR @F12SR;
-  ELSE;
-    EXSR @ERRCK;
-  ENDIF;
-
-  IF KEY = @F10 AND NOT *INLR AND NOT *IN50;
-    EXSR @F10SR;
-    LEAVE;
-  ENDIF;
+  SELECT;
+    WHEN pressedKey = KEY_F2;
+      handleRefresh();
+    WHEN pressedKey = KEY_F3;
+      handleExit();
+    WHEN pressedKey = KEY_F4;
+      handleAgentSelect();
+    WHEN pressedKey = KEY_F9;
+      handleCommandLine();
+    WHEN pressedKey = KEY_F12;
+      handleExit();
+    OTHER;
+      IF validateLogon();
+        IF pressedKey = KEY_F10 AND NOT *INLR;
+          processEntry(AGNMBR : runType);
+          LEAVE;
+        ENDIF;
+      ENDIF;
+  ENDSL;
 
 ENDDO;
 
 *INLR = *ON;
 
 // ============================================================
-// Subroutine: INZSR - Initialization
+// Procedure: initialize
+// Sets up indicators and display-file fields for first display.
 // ============================================================
-BEGSR INZSR;
+DCL-PROC initialize;
   *IN50 = *OFF;
   *IN51 = *OFF;
   *IN52 = *OFF;
 
-  MSGID  = '       ';
-  MSGDTA = *BLANKS;
-  MSGQUE = @PGM;
-
-  @EXIT = @FALSE;
-  PGMQ  = @PGM;
-ENDSR;
+  PGMQ     = programName;
+  exitFlag = EXIT_NO;
+END-PROC;
 
 // ============================================================
-// Subroutine: @ERRCK - Validate Input Data
-//
-// Original used CHECKR+MOVEL to build a varying-length key DS
-// (AGNKEY/PWDKEY) for CHAIN on the program-described file.
-// Since AGENTSL is now externally described (*EXT), CHAIN uses
-// AGNTNM directly and PASSWD is compared to AGPASS from the
-// file record.
+// Procedure: validateLogon
+// Validates the agent name and password entered on the logon
+// screen. Sets display-file error indicators (*IN50/*IN51/*IN52)
+// and sends appropriate error messages on failure.
+// Returns *ON when logon is valid, *OFF otherwise.
 // ============================================================
-BEGSR @ERRCK;
+DCL-PROC validateLogon;
+  DCL-PI *N  IND  END-PI;
+
   *IN44 = *OFF;
   *IN50 = *OFF;
   *IN51 = *OFF;
   *IN52 = *OFF;
 
-  EXSR @RMVMS;
+  removeMessages();
 
+  // Agent name is required
   IF AGNTNM = *BLANKS;
     *IN50 = *ON;
     *IN51 = *ON;
-    MSGID = 'FRS0050';
-    EXSR @SNDMS;
+    sendMessage('FRS0050');
   ENDIF;
 
+  // Password is required; stop here if blank (nothing to look up)
   IF PASSWD = *BLANKS;
     *IN50 = *ON;
     *IN52 = *ON;
-    MSGID = 'FRS0055';
-    EXSR @SNDMS;
-    LEAVESR;
+    sendMessage('FRS0055');
+    RETURN *OFF;
   ENDIF;
 
+  // Look up the agent by name
   CHAIN AGNTNM AGENTSL;
   IF NOT %FOUND(AGENTSL);
     *IN50 = *ON;
     *IN51 = *ON;
-    MSGID = 'FRS0052';
-    EXSR @SNDMS;
-    LEAVESR;
+    sendMessage('FRS0052');
+    RETURN *OFF;
   ENDIF;
 
+  // Verify password matches the stored value
   IF PASSWD <> AGPASS;
     *IN50 = *ON;
     *IN52 = *ON;
-    MSGID = 'FRS0057';
-    EXSR @SNDMS;
-    LEAVESR;
+    sendMessage('FRS0057');
+    RETURN *OFF;
   ENDIF;
 
-ENDSR;
+  RETURN *ON;
+END-PROC;
 
 // ============================================================
-// Subroutine: @RMVMS - Remove Messages
+// Procedure: removeMessages
+// Clears all messages from the program message queue using the
+// QMHRMVPM API. All API parameters are local to this procedure.
 // ============================================================
-BEGSR @RMVMS;
-  CALLP QMHRMVPM(RMVMSQ:RMVCTR:RMVKEY:RMVCLR:APIERR);
-ENDSR;
+DCL-PROC removeMessages;
+  DCL-S msgQueueName  CHAR(10)    STATIC INZ('*         ');
+  DCL-S msgQueueCtr   BINDEC(9:0) STATIC INZ(0);
+  DCL-S msgKey        CHAR(4)     STATIC INZ('    ');
+  DCL-S removeType    CHAR(10)    STATIC INZ('*ALL      ');
+
+  CALLP QMHRMVPM(msgQueueName : msgQueueCtr : msgKey : removeType : apiError);
+END-PROC;
 
 // ============================================================
-// Subroutine: @SNDMS - Send Message
+// Procedure: sendMessage
+// Sends an informational message to the program message queue
+// using the QMHSNDPM API. All API parameters except the message
+// ID are encapsulated locally.
+//   p_messageId - 7-character message ID from FRSMSGF
 // ============================================================
-BEGSR @SNDMS;
-  CALLP QMHSNDPM(MSGID:MSGF:MSGDTA:MSGLEN:MSGTYP:
-                 MSGQUE:MSGCTR:MSGKEY:APIERR);
-ENDSR;
+DCL-PROC sendMessage;
+  DCL-PI *N;
+    p_messageId  CHAR(7)  CONST;
+  END-PI;
+
+  DCL-S messageIdWork    CHAR(7)      STATIC;
+  DCL-S msgFile          CHAR(20)     STATIC INZ('FRSMSGF   FLGHT400  ');
+  DCL-S messageData      CHAR(80)     STATIC INZ;
+  DCL-S messageDataLen   BINDEC(9:0)  STATIC INZ(80);
+  DCL-S messageType      CHAR(10)     STATIC INZ('*INFO     ');
+  DCL-S programQueue     CHAR(10)     STATIC;
+  DCL-S msgQueueCtr      BINDEC(9:0)  STATIC INZ(0);
+  DCL-S returnedMsgKey   CHAR(4)      STATIC INZ('    ');
+
+  messageIdWork = p_messageId;
+  programQueue  = programName;
+
+  CALLP QMHSNDPM(messageIdWork  : msgFile       : messageData     :
+                 messageDataLen : messageType   : programQueue    :
+                 msgQueueCtr    : returnedMsgKey : apiError);
+
+  // Write the returned message key into the WORKSTN MSGRCD field
+  // so the display file can show the message on screen.
+  MSGKEY = returnedMsgKey;
+  PGMQ   = programQueue;
+END-PROC;
 
 // ============================================================
-// Subroutine: @F02SR - F2 Refresh
+// Procedure: handleRefresh
+// F2 - clears error indicators, resets the logon screen, and
+// removes any pending program messages.
 // ============================================================
-BEGSR @F02SR;
+DCL-PROC handleRefresh;
   *IN50 = *OFF;
   *IN51 = *OFF;
   *IN52 = *OFF;
   RESET LOGONR;
-  EXSR @RMVMS;
-ENDSR;
+  removeMessages();
+END-PROC;
 
 // ============================================================
-// Subroutine: @F03SR - F3 Exit
+// Procedure: handleExit
+// F3 / F12 - sets the exit flag to end the main loop.
 // ============================================================
-BEGSR @F03SR;
-  @EXIT = @TRUE;
-ENDSR;
+DCL-PROC handleExit;
+  exitFlag = EXIT_YES;
+END-PROC;
 
 // ============================================================
-// Subroutine: @F04SR - F4 Agent Select
+// Procedure: handleAgentSelect
+// F4 - clears the agent name field and calls the agent
+// selection program (FRS401) so the user can pick an agent.
 // ============================================================
-BEGSR @F04SR;
-  AGNTNM = *BLANKS;
-  CALLP FRS401(AGNTNM);
-ENDSR;
+DCL-PROC handleAgentSelect;
+  DCL-S agentNameWork  CHAR(10)  STATIC INZ(*BLANKS);
+
+  agentNameWork = AGNTNM;
+  FRS401(agentNameWork);
+  AGNTNM = agentNameWork;
+END-PROC;
 
 // ============================================================
-// Subroutine: @F09SR - F9 Command Line
+// Procedure: handleCommandLine
+// F9 - opens the interactive command line (QUSCMDLN).
 // ============================================================
-BEGSR @F09SR;
-  CALLP QUSCMDLN();
-ENDSR;
+DCL-PROC handleCommandLine;
+  QUSCMDLN();
+END-PROC;
 
 // ============================================================
-// Subroutine: @F10SR - F10 Process Record
-//
-// Original used MOVEL AGNMBR AGENT# to move the binary field
-// into a local zoned numeric. AGNMBR is now INT-compatible via
-// the externally described file; direct assignment handles the
-// type conversion automatically.
+// Procedure: processEntry
+// F10 - routes to the appropriate downstream program based on
+// the run type passed at program invocation. CMDEXC commands
+// and command length are encapsulated locally.
+//   p_agentNumber - agent number read from AGENTSL
+//   p_runType     - operation code: CREATE / UPDATE / DSPLAY /
+//                   DELETE / FAX / MAINT / REPORT
 // ============================================================
-BEGSR @F10SR;
-  AGENT# = AGNMBR;
+DCL-PROC processEntry;
+  DCL-PI *N;
+    p_agentNumber  PACKED(9:0)  VALUE;
+    p_runType      CHAR(6)      CONST;
+  END-PI;
+
+  // Work copies needed because prototypes expect by-reference params
+  DCL-S agentNumWork  PACKED(9:0) STATIC;
+  DCL-S runTypeWork   CHAR(6)     STATIC;
+
+  agentNumWork = p_agentNumber;
+  runTypeWork  = p_runType;
 
   SELECT;
-    WHEN RUNTYP = 'CREATE';
-      CALLP FRS001(AGENT#);
-    WHEN RUNTYP = 'UPDATE';
-      CALLP FRS009(AGENT#:RUNTYP);
-    WHEN RUNTYP = 'DSPLAY';
-      CALLP FRS009(AGENT#:RUNTYP);
-    WHEN RUNTYP = 'DELETE';
-      CALLP FRS009(AGENT#:RUNTYP);
-    WHEN RUNTYP = 'FAX   ';
-      CALLP FRS009(AGENT#:RUNTYP);
-    WHEN RUNTYP = 'MAINT ';
-      CMDLEN = 19;
-      CALLP QCMDEXC(CRTCMD:CMDLEN);
-    WHEN RUNTYP = 'REPORT';
-      CMDLEN = 19;
-      CALLP QCMDEXC(CRTCM2:CMDLEN);
+    WHEN p_runType = 'CREATE';
+      FRS001(agentNumWork);
+    WHEN p_runType = 'UPDATE' OR p_runType = 'DSPLAY'
+      OR p_runType = 'DELETE' OR p_runType = 'FAX   ';
+      FRS009(agentNumWork : runTypeWork);
+    WHEN p_runType = 'MAINT ';
+      processMaintMenu();
+    WHEN p_runType = 'REPORT';
+      processReportMenu();
   ENDSL;
-ENDSR;
+END-PROC;
 
 // ============================================================
-// Subroutine: @F12SR - F12 Cancel
+// Procedure: processMaintMenu
+// Launches the maintenance menu via QCMDEXC.
+// Command string and length are local to this procedure.
 // ============================================================
-BEGSR @F12SR;
-  @EXIT = @TRUE;
-ENDSR;
+DCL-PROC processMaintMenu;
+  DCL-S goCommand     CHAR(19)     STATIC INZ('GO FLGHT400/FRSMANT');
+  DCL-S commandLength PACKED(15:5) STATIC INZ(19);
+
+  QCMDEXC(goCommand : commandLength);
+END-PROC;
+
+// ============================================================
+// Procedure: processReportMenu
+// Launches the report menu via QCMDEXC.
+// Command string and length are local to this procedure.
+// ============================================================
+DCL-PROC processReportMenu;
+  DCL-S goCommand     CHAR(19)     STATIC INZ('GO FLGHT400/FRSREPT');
+  DCL-S commandLength PACKED(15:5) STATIC INZ(19);
+
+  QCMDEXC(goCommand : commandLength);
+END-PROC;

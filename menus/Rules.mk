@@ -1,4 +1,12 @@
 # Layer 3 -- Menus
 FRSMAIN.FILE: frsmain.mnudds
-FRSMANT.FILE: frsmant.mnudds
+FRSMAIN.MSGF: frsmainqq.mnucmd
+FRSMAIN.MENU: FRSMAIN.FILE FRSMAIN.MSGF
+
+FRSMANT.FILE: frsmant.mnudds frsmantqq.mnucmd
+FRSMANT.MSGF: frsmant.mnucmd
+FRSMANT.MENU: FRSMAIN.FILE FRSMANT.MSGF
+
 FRSREPT.FILE: frsrept.mnudds
+FRSREPT.MSGF: frsreptqq.mnucmd
+FRSREPT.MENU: FRSREPT.FILE FRSREPT.MSGF

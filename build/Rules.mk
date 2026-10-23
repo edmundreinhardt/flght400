@@ -2,13 +2,13 @@
 # Understand: BOUND_SRVPGM -> FUTIL
 
 # BFLGHT -- Builds FLIGHTS, FRCITY, TOCITY, AIRLINE test data
-BFLGHT.PGM: bflght.rpgle \
+BFLGHT.PGM: populateFlights.rpgle \
     FLIGHTS.FILE FRCITY.FILE TOCITY.FILE \
     AIRLINE.FILE \
     FUTIL.SRVPGM
 
 # BCUST -- Builds CUSTOMERS test data using FNAME/LNAME tables
-BCUST.PGM: bcust.rpgle \
+BCUST.PGM: populateCustomers.rpgle \
     CUSTOMERS.FILE FNAME.FILE LNAME.FILE \
     FUTIL.SRVPGM
 

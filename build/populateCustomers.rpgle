@@ -1,7 +1,8 @@
 **FREE
 // -----------------------------------------------------------------
-// BCUST_FREE.RPGLE - Build Customer File
-// Converted from Fixed-Format RPGLE to Fully Free-Format RPGLE
+// Program:     BCUST
+// Source file: populateCustomers.rpgle
+// Description: Build Customer File
 // -----------------------------------------------------------------
 CTL-OPT DFTACTGRP(*NO) ACTGRP(*NEW) BNDDIR('FUTIL');
 

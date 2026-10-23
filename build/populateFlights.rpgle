@@ -1,6 +1,7 @@
 **FREE
 // -----------------------------------------------------------------
-// Program: BFLGHT
+// Program:     BFLGHT
+// Source file: populateFlights.rpgle
 // Description: Build flight schedule from city tables
 // -----------------------------------------------------------------
 

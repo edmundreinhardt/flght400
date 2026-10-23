@@ -1,240 +1,289 @@
-     H DFTACTGRP(*NO) ACTGRP(*CALLER)
+**FREE
+// ============================================================
+// Program  : FRS000
+// Purpose  : Flight Reservations - Logon / Entry Screen
+// Converted: Fixed-form RPGLE to fully free-format RPGLE
+//
+// Conversion notes:
+//   - AGENTSL was declared as program-described (F) in the original
+//     F-spec but the *FILE object has external DDS (PROGRAM_DESCRIBED=NO).
+//     Re-declared as DISK(*EXT) KEYED - I-specs removed, fields resolve
+//     from DDS (AGNMBR, AGNAME, AGPASS).
+//   - AGNKEY/PWDKEY variable-length key DSes removed; CHAIN now uses
+//     AGNTNM directly on the externally described keyed file.
+//   - CHECKR/MOVEL key-build pattern replaced by direct field comparison.
+// ============================================================
 
-     FFRS000DF  CF   E             WORKSTN INFDS(WSDS)
-     FAGENTSL   IF   F  136    66AIDISK    KEYLOC(5)
-     D*
-     D @F01            C                   CONST(X'31')
-     D @F02            C                   CONST(X'32')
-     D @F03            C                   CONST(X'33')
-     D @F04            C                   CONST(X'34')
-     D @F09            C                   CONST(X'39')
-     D @F10            C                   CONST(X'3A')
-     D @F12            C                   CONST(X'3C')
-     D @ENTER          C                   CONST(X'F1')
-     D @HELP           C                   CONST(X'F3')
-     D @PRINT          C                   CONST(X'F6')
-     D*
-     D APOST           C                   CONST(X'7D')
-     D*
-     D @FALSE          C                   CONST('0')
-     D @TRUE           C                   CONST('1')
-     D*
-     D                SDS
-     D  @PGM                   1     10                                          _ERR_
-     D  @STAT                 11     15  0                                       _ERR_
-     D  @PARMS                37     39  0                                       _ERR_
-     D  @MSGID                40     46                                          _ERR_
-     D  @DATA                 91    169                                          _ERR_
-     D  @JOBNA               244    253                                          _ERR_
-     D  @USRNA               254    263                                          _ERR_
-     D  @JOBNO               264    269                                          _ERR_
-     D  @SRCF                304    313                                          _ERR_
-     D  @SRCL                314    323                                          _ERR_
-     D  @SRCM                324    333                                          _ERR_
-     D*
-     D APIERR          DS
-     D  ERRSIZ                 1      4B 0 INZ(256)
-     D  ERRLEN                 5      8B 0 INZ(0)
-     D  ERRMIC                 9     15    INZ
-     D  ERRNBR                16     16    INZ
-     D  ERRDTA                17    256    INZ
-     D*
-     D                 DS
-     D  MSGCTR                 1      4B 0 INZ(0)
-     D  MSGLEN                 5      8B 0 INZ(80)
-     D  MSGF                   9     28    INZ('FRSMSGF   FLGHT400  ')
-     D  MSGTYP                29     38    INZ('*INFO     ')
-     D  MSGKEY                39     42    INZ('    ')
-     D*
-     D                 DS
-     D  RMVCTR                 1      4B 0 INZ(0)
-     D  RMVMSQ                 5     14    INZ('*         ')
-     D  RMVCLR                15     24    INZ('*ALL      ')
-     D  RMVKEY                25     28    INZ('    ')
-     D*
-     D WSDS            DS
-     D  KEY                  369    369
-     D*
-     D                 DS
-     D  AGNKEY                 1     66
-     D  AGNLEN                 1      2B 0
-     D  AGNNAM                 3     66
-     D*
-     D                 DS
-     D  PWDKEY                 1     66
-     D  PWDLEN                 1      2B 0
-     D  PWDNAM                 3     66
-     D*
-     D CRTCMD          DS
-     D  GOCMD1                 1     19    INZ('GO FLGHT400/FRSMANT')
-     D*
-     D CRTCM2          DS
-     D  GOCMD2                 1     19    INZ('GO FLGHT400/FRSREPT')
-     D*
-      /COPY 'protypes.rpgleinc'
-     I*
-     IAGENTSL   NS  01
-     I                             B    1    4 0AGNMBR
-     I                                  5   70  AGNAME
-     I                                 71  136  AGPASS
-     I*
-     C*
-     C     *ENTRY        PLIST
-     C                   PARM                    RUNTYP            6
-     C*                                                     * D=DELETE
-     C                   RESET                   LOGONR                          * REFRESH SCREEN -
-     C                   EXSR      INZSR
-     C*
-     C     @EXIT         DOUEQ     @TRUE
-     C*
-     C                   WRITE     MSGCTL                                        * WRITE MSGCTL
-     C                   EXFMT     LOGONR                                        * DISPLAY SCREEN
-     C*
-     C     KEY           CASEQ     @F02          @F02SR                          * F02 REFRESH
-     C     KEY           CASEQ     @F03          @F03SR                          * F03 EXIT
-     C     KEY           CASEQ     @F04          @F04SR                          * F03 EXIT
-     C     KEY           CASEQ     @F09          @F09SR                          * F03 EXIT
-     C     KEY           CASEQ     @F12          @F12SR                          * F12 CANCEL
-     C                   CAS                     @ERRCK                          * CK FOR ERRORS
-     C                   ENDCS
-     C*
-     C     KEY           IFEQ      @F10                                          * F10 PRESSED
-     C     *INLR         ANDNE     *ON                                           * F10 PRESSED
-     C     *IN50         ANDEQ     *OFF                                          * 50 OFF=NO ERRS
-     C                   EXSR      @F10SR                                        * CREATE RECRD
-     C                   LEAVE                                                   * LEAVE DO LOOP
-     C                   ENDIF                                                   * END IF
-     C*
-     C                   ENDDO                                                   * END DO
-     C*
-     C     END           TAG
-     C*
-     C                   MOVE      *ON           *INLR                           * LAST RECORD=ON
-     C*
-     C*
-     C*
-     C     INZSR         BEGSR                                                   * SET OUTPT SCREEN
-     C*
-     C                   SETOFF                                       505152     * ERROR IND. SC 1
-     C*
-     C                   MOVE      ' '           MSGID             7
-     C                   MOVE      *BLANKS       MSGDTA           80
-     C                   MOVE      @PGM          MSGQUE           10
-     C*
-     C                   MOVE      @FALSE        @EXIT             1
-     C                   MOVE      @PGM          PGMQ
-     C*
-     C     ENDINZ        ENDSR
-     C*
-     C*
-     C*
-     C     @ERRCK        BEGSR                                                   * CHK INPUT DATA
-     C*
-     C                   SETOFF                                         44       * ERROR IND. SC 1
-     C                   SETOFF                                       505152     * ERROR IND. SC 1
-     C*
-     C                   EXSR      @RMVMS
-     C*
-     C     AGNTNM        IFEQ      *BLANKS                                       * RUN INTERACTIVE
-     C                   SETON                                          5051     * SET ERR INDICATOR
-     C                   MOVE      'FRS0050'     MSGID                           * SET ERR MESSAGE
-     C                   EXSR      @SNDMS                                        * SND ERR MESSAGE
-     C                   END
-     C*
-     C     PASSWD        IFEQ      *BLANKS                                       * RUN INTERACTIVE
-     C                   SETON                                          5052     * SET ERR INDICATOR
-     C                   MOVE      'FRS0055'     MSGID                           * SET ERR MESSAGE
-     C                   EXSR      @SNDMS                                        * SND ERR MESSAGE
-     C                   GOTO      ERREND
-     C                   END
-     C*
-     C                   MOVE      *BLANKS       AGNKEY                          * SET ERR MESSAGE
-     C     ' '           CHECKR    AGNTNM        AGNLEN                          * SET ERR MESSAGE
-     C                   MOVEL     AGNTNM        AGNNAM                          * SET ERR MESSAGE
-     C*
-     C     AGNKEY        CHAIN     AGENTSL                            44         * RUN INTERACTIVE
-     C     *IN44         IFEQ      @TRUE                                         * RUN INTERACTIVE
-     C                   SETON                                          5051     * SET ERR INDICATOR
-     C                   MOVE      'FRS0052'     MSGID                           * SET ERR MESSAGE
-     C                   EXSR      @SNDMS                                        * SND ERR MESSAGE
-     C                   GOTO      ERREND
-     C                   END
-     C*
-     C                   MOVE      *BLANKS       PWDKEY                          * SET ERR MESSAGE
-     C     ' '           CHECKR    PASSWD        PWDLEN                          * SET ERR MESSAGE
-     C                   MOVEL     PASSWD        PWDNAM                          * SET ERR MESSAGE
-     C*
-     C     PWDKEY        IFNE      AGPASS                                        * RUN INTERACTIVE
-     C                   SETON                                          5052     * SET ERR INDICATOR
-     C                   MOVE      'FRS0057'     MSGID                           * SET ERR MESSAGE
-     C                   EXSR      @SNDMS                                        * SND ERR MESSAGE
-     C                   GOTO      ERREND
-     C                   END
-     C*
-     C     ERREND        ENDSR
-     C*
-     C*
-     C     @RMVMS        BEGSR
-     C                   CALLP     QMHRMVPM(RMVMSQ:RMVCTR:RMVKEY:RMVCLR:APIERR)
-     C                   ENDSR
-     C*
-     C*
-     C     @SNDMS        BEGSR
-     C                   CALLP     QMHSNDPM(MSGID:MSGF:MSGDTA:MSGLEN:MSGTYP:
-     C                             MSGQUE:MSGCTR:MSGKEY:APIERR)
-     C                   ENDSR
-     C*
-     C*
-     C     @F02SR        BEGSR                                                   * F2 SUBROUTINE
-     C                   SETOFF                                       505152     * ERROR IND. SC 1
-     C                   RESET                   LOGONR                          * REFRESH SCREEN -
-     C                   EXSR      @RMVMS
-     C                   ENDSR
-     C*
-     C*
-     C     @F03SR        BEGSR                                                   * F3 SUBROUTINE
-     C                   MOVE      @TRUE         @EXIT                           * SET EXIT FLAG ON
-     C                   ENDSR
-     C*
-     C*
-     C     @F04SR        BEGSR                                                   * F3 SUBROUTINE
-     C                   MOVE      *BLANKS       AGNTNM                          * RESET STATUS IND
-     C                   CALLP     FRS401(AGNTNM)                                * SELCT START INTRV
-     C                   ENDSR
-     C*
-     C*
-     C     @F09SR        BEGSR                                                   * F9 SUBROUTINE
-     C                   CALLP     QUSCMDLN()                                    * GET CMD LINE
-     C                   ENDSR
-     C*
-     C*
-     C     @F10SR        BEGSR                                                   * F10 SUBROUTINE
-     C*
-     C                   MOVEL     AGNMBR        AGENT#            9 0
-     C*
-     C                   SELECT                                                  * F02 REFRESH
-     C     RUNTYP        WHENEQ    'CREATE'                                      * F03 EXIT
-     C                   CALLP     FRS001(AGENT#)
-     C     RUNTYP        WHENEQ    'UPDATE'                                      * F03 EXIT
-     C                   CALLP     FRS009(AGENT#:RUNTYP)
-     C     RUNTYP        WHENEQ    'DSPLAY'                                      * F03 EXIT
-     C                   CALLP     FRS009(AGENT#:RUNTYP)
-     C     RUNTYP        WHENEQ    'DELETE'                                      * F03 EXIT
-     C                   CALLP     FRS009(AGENT#:RUNTYP)
-     C     RUNTYP        WHENEQ    'FAX   '                                      * F03 EXIT
-     C                   CALLP     FRS009(AGENT#:RUNTYP)
-     C     RUNTYP        WHENEQ    'MAINT '                                      * F03 EXIT
-     C                   Z-ADD     19            CMDLEN           15 5
-     C                   CALLP     QCMDEXC(CRTCMD:CMDLEN)
-     C     RUNTYP        WHENEQ    'REPORT'                                      * F03 EXIT
-     C                   Z-ADD     19            CMDLEN
-     C                   CALLP     QCMDEXC(CRTCM2:CMDLEN)
-     C                   ENDSL                                                   * F12 CANCEL
-     C*
-     C     F10END        ENDSR
-     C*
-     C*
-     C     @F12SR        BEGSR
-     C                   MOVE      @TRUE         @EXIT
-     C                   ENDSR
-     C*
+CTL-OPT DFTACTGRP(*NO) ACTGRP(*CALLER);
+
+// ---- File Declarations -------------------------------------
+DCL-F FRS000DF WORKSTN INFDS(WSDS);
+DCL-F AGENTSL DISK(*EXT) KEYED USAGE(*INPUT);
+
+// ---- Named Constants ---------------------------------------
+DCL-C @F01   X'31';
+DCL-C @F02   X'32';
+DCL-C @F03   X'33';
+DCL-C @F04   X'34';
+DCL-C @F09   X'39';
+DCL-C @F10   X'3A';
+DCL-C @F12   X'3C';
+DCL-C @ENTER X'F1';
+DCL-C @HELP  X'F3';
+DCL-C @PRINT X'F6';
+
+DCL-C APOST  X'7D';
+
+DCL-C @FALSE '0';
+DCL-C @TRUE  '1';
+
+// ---- Program Status Data Structure -------------------------
+DCL-DS *N PSDS;
+  @PGM    CHAR(10)   POS(1);
+  @STAT   ZONED(5:0) POS(11);
+  @PARMS  ZONED(3:0) POS(37);
+  @MSGID  CHAR(7)    POS(40);
+  @DATA   CHAR(79)   POS(91);
+  @JOBNA  CHAR(10)   POS(244);
+  @USRNA  CHAR(10)   POS(254);
+  @JOBNO  CHAR(6)    POS(264);
+  @SRCF   CHAR(10)   POS(304);
+  @SRCL   CHAR(10)   POS(314);
+  @SRCM   CHAR(10)   POS(324);
+END-DS;
+
+// ---- API Error Data Structure ------------------------------
+DCL-DS APIERR;
+  ERRSIZ  BINDEC(9:0)  INZ(256);
+  ERRLEN  BINDEC(9:0)  INZ(0);
+  ERRMIC  CHAR(7)      INZ;
+  ERRNBR  CHAR(1)      INZ;
+  ERRDTA  CHAR(240)    INZ;
+END-DS;
+
+// ---- Send Message Parameters --------------------------------
+DCL-S MSGCTR  BINDEC(9:0) INZ(0);
+DCL-S MSGLEN  BINDEC(9:0) INZ(80);
+DCL-S MSGF    CHAR(20)    INZ('FRSMSGF   FLGHT400  ');
+DCL-S MSGTYP  CHAR(10)    INZ('*INFO     ');
+
+// ---- Remove Message Parameters ------------------------------
+DCL-S RMVCTR  BINDEC(9:0) INZ(0);
+DCL-S RMVMSQ  CHAR(10)    INZ('*         ');
+DCL-S RMVCLR  CHAR(10)    INZ('*ALL      ');
+DCL-S RMVKEY  CHAR(4)     INZ('    ');
+
+// ---- Workstation INFDS -------------------------------------
+DCL-DS WSDS;
+  KEY  CHAR(1)  POS(369);
+END-DS;
+
+// ---- Command Data Structures --------------------------------
+DCL-DS CRTCMD;
+  GOCMD1  CHAR(19) INZ('GO FLGHT400/FRSMANT');
+END-DS;
+
+DCL-DS CRTCM2;
+  GOCMD2  CHAR(19) INZ('GO FLGHT400/FRSREPT');
+END-DS;
+
+// ---- Prototypes (external copy) ----------------------------
+/COPY 'protypes.rpgleinc'
+
+// ---- Program Entry Interface --------------------------------
+DCL-PI *N;
+  RUNTYP  CHAR(6);
+END-PI;
+
+// ---- Standalone Variables -----------------------------------
+DCL-S @EXIT   CHAR(1);
+DCL-S CMDLEN  PACKED(15:5);
+DCL-S AGENT#  PACKED(9:0);
+DCL-S MSGID   CHAR(7)   INZ;
+DCL-S MSGDTA  CHAR(80)  INZ;
+DCL-S MSGQUE  CHAR(10)  INZ;
+
+// ---- Main Logic --------------------------------------------
+RESET LOGONR;
+EXSR INZSR;
+
+DOU @EXIT = @TRUE;
+
+  WRITE MSGCTL;
+  EXFMT LOGONR;
+
+  IF KEY = @F02;
+    EXSR @F02SR;
+  ELSEIF KEY = @F03;
+    EXSR @F03SR;
+  ELSEIF KEY = @F04;
+    EXSR @F04SR;
+  ELSEIF KEY = @F09;
+    EXSR @F09SR;
+  ELSEIF KEY = @F12;
+    EXSR @F12SR;
+  ELSE;
+    EXSR @ERRCK;
+  ENDIF;
+
+  IF KEY = @F10 AND NOT *INLR AND NOT *IN50;
+    EXSR @F10SR;
+    LEAVE;
+  ENDIF;
+
+ENDDO;
+
+*INLR = *ON;
+
+// ============================================================
+// Subroutine: INZSR - Initialization
+// ============================================================
+BEGSR INZSR;
+  *IN50 = *OFF;
+  *IN51 = *OFF;
+  *IN52 = *OFF;
+
+  MSGID  = '       ';
+  MSGDTA = *BLANKS;
+  MSGQUE = @PGM;
+
+  @EXIT = @FALSE;
+  PGMQ  = @PGM;
+ENDSR;
+
+// ============================================================
+// Subroutine: @ERRCK - Validate Input Data
+//
+// Original used CHECKR+MOVEL to build a varying-length key DS
+// (AGNKEY/PWDKEY) for CHAIN on the program-described file.
+// Since AGENTSL is now externally described (*EXT), CHAIN uses
+// AGNTNM directly and PASSWD is compared to AGPASS from the
+// file record.
+// ============================================================
+BEGSR @ERRCK;
+  *IN44 = *OFF;
+  *IN50 = *OFF;
+  *IN51 = *OFF;
+  *IN52 = *OFF;
+
+  EXSR @RMVMS;
+
+  IF AGNTNM = *BLANKS;
+    *IN50 = *ON;
+    *IN51 = *ON;
+    MSGID = 'FRS0050';
+    EXSR @SNDMS;
+  ENDIF;
+
+  IF PASSWD = *BLANKS;
+    *IN50 = *ON;
+    *IN52 = *ON;
+    MSGID = 'FRS0055';
+    EXSR @SNDMS;
+    LEAVESR;
+  ENDIF;
+
+  CHAIN AGNTNM AGENTSL;
+  IF NOT %FOUND(AGENTSL);
+    *IN50 = *ON;
+    *IN51 = *ON;
+    MSGID = 'FRS0052';
+    EXSR @SNDMS;
+    LEAVESR;
+  ENDIF;
+
+  IF PASSWD <> AGPASS;
+    *IN50 = *ON;
+    *IN52 = *ON;
+    MSGID = 'FRS0057';
+    EXSR @SNDMS;
+    LEAVESR;
+  ENDIF;
+
+ENDSR;
+
+// ============================================================
+// Subroutine: @RMVMS - Remove Messages
+// ============================================================
+BEGSR @RMVMS;
+  CALLP QMHRMVPM(RMVMSQ:RMVCTR:RMVKEY:RMVCLR:APIERR);
+ENDSR;
+
+// ============================================================
+// Subroutine: @SNDMS - Send Message
+// ============================================================
+BEGSR @SNDMS;
+  CALLP QMHSNDPM(MSGID:MSGF:MSGDTA:MSGLEN:MSGTYP:
+                 MSGQUE:MSGCTR:MSGKEY:APIERR);
+ENDSR;
+
+// ============================================================
+// Subroutine: @F02SR - F2 Refresh
+// ============================================================
+BEGSR @F02SR;
+  *IN50 = *OFF;
+  *IN51 = *OFF;
+  *IN52 = *OFF;
+  RESET LOGONR;
+  EXSR @RMVMS;
+ENDSR;
+
+// ============================================================
+// Subroutine: @F03SR - F3 Exit
+// ============================================================
+BEGSR @F03SR;
+  @EXIT = @TRUE;
+ENDSR;
+
+// ============================================================
+// Subroutine: @F04SR - F4 Agent Select
+// ============================================================
+BEGSR @F04SR;
+  AGNTNM = *BLANKS;
+  CALLP FRS401(AGNTNM);
+ENDSR;
+
+// ============================================================
+// Subroutine: @F09SR - F9 Command Line
+// ============================================================
+BEGSR @F09SR;
+  CALLP QUSCMDLN();
+ENDSR;
+
+// ============================================================
+// Subroutine: @F10SR - F10 Process Record
+//
+// Original used MOVEL AGNMBR AGENT# to move the binary field
+// into a local zoned numeric. AGNMBR is now INT-compatible via
+// the externally described file; direct assignment handles the
+// type conversion automatically.
+// ============================================================
+BEGSR @F10SR;
+  AGENT# = AGNMBR;
+
+  SELECT;
+    WHEN RUNTYP = 'CREATE';
+      CALLP FRS001(AGENT#);
+    WHEN RUNTYP = 'UPDATE';
+      CALLP FRS009(AGENT#:RUNTYP);
+    WHEN RUNTYP = 'DSPLAY';
+      CALLP FRS009(AGENT#:RUNTYP);
+    WHEN RUNTYP = 'DELETE';
+      CALLP FRS009(AGENT#:RUNTYP);
+    WHEN RUNTYP = 'FAX   ';
+      CALLP FRS009(AGENT#:RUNTYP);
+    WHEN RUNTYP = 'MAINT ';
+      CMDLEN = 19;
+      CALLP QCMDEXC(CRTCMD:CMDLEN);
+    WHEN RUNTYP = 'REPORT';
+      CMDLEN = 19;
+      CALLP QCMDEXC(CRTCM2:CMDLEN);
+  ENDSL;
+ENDSR;
+
+// ============================================================
+// Subroutine: @F12SR - F12 Cancel
+// ============================================================
+BEGSR @F12SR;
+  @EXIT = @TRUE;
+ENDSR;
